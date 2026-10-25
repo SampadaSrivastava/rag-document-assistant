@@ -213,35 +213,7 @@ tests/                  pytest suite
 
 *(Add your images to `docs/screenshots/`.)*
 
-## Interview Questions
 
-**What is RAG?** Retrieval-Augmented Generation: fetch relevant passages from your own data at question time and give them to an LLM as context, so it answers from them rather than from memory.
-
-**Why did you use RAG?** The model has never seen the user's PDFs, and I want answers that are verifiable. RAG gives current, private knowledge with citations and no training.
-
-**What are embeddings?** Lists of numbers that represent the meaning of text. Texts with similar meaning have vectors that are close together.
-
-**What is a vector database?** A database built to find the stored vectors nearest to a query vector quickly, usually with approximate nearest-neighbour indexes (Chroma uses HNSW), plus metadata filtering.
-
-**Why ChromaDB?** It needs no server or account, runs in-process, supports metadata filters, and is easy to demo. For production scale I'd move to a managed or server-based store.
-
-**Why Gemini?** It has a free tier, is fast, and handles long prompts. The LLM sits behind one function, so switching providers is a small change.
-
-**How does retrieval work?** The question is embedded with the same model as the chunks; Chroma returns the chunks with the highest cosine similarity, restricted to the selected documents; chunks under a threshold are discarded.
-
-**What is chunking?** Splitting documents into small passages so each can be embedded and retrieved on its own. It's needed because embedding a whole document blurs its meaning and the LLM prompt has limited room.
-
-**How did you choose chunk size?** About 1000 characters is a standard starting point: big enough for a complete idea, small enough to be specific, and within the embedding model's input limit. I made it configurable because the best value depends on the documents and I haven't tuned it with an evaluation set.
-
-**What happens if the answer isn't in the document?** Two guards: if no chunk passes the similarity threshold, the app answers "not found" without calling the LLM; otherwise the prompt tells Gemini to reply with a fixed not-found sentence, which the app detects and shows without sources.
-
-**RAG vs fine-tuning?** Fine-tuning changes the model's behaviour or style but is a poor way to add facts: it's costly, goes stale, and can't cite. RAG updates knowledge by changing the index and can show sources. They can be combined.
-
-**What causes hallucinations?** The model generating plausible text when it lacks grounded information: missing or irrelevant context, ambiguous questions, or prompts that don't forbid guessing. Mitigations here are retrieval thresholds, a strict prompt, low temperature and showing sources.
-
-**How would you scale this application?** Move the vector store to a managed database with per-user namespaces, process uploads in a background worker queue, cache embeddings, batch embedding calls (or use a hosted embedding API), and put the model call behind rate limiting and retries.
-
-**How would you deploy it in production?** Containerise it, run behind a reverse proxy with authentication, keep secrets in a secrets manager, use an external vector DB and object storage for the PDFs, and add logging and monitoring.
 
 **How would you replace ChromaDB with Pinecone?** Re-implement the four methods of `DocumentStore` (`add_chunks`, `delete_document`, `search`, `sample_chunks`) using `langchain-pinecone`, use a namespace per user or session, and keep the metadata fields the same. Nothing else changes.
 
